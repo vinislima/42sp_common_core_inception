@@ -1,0 +1,2 @@
+# Exclude OS/editor artifacts from the build context sent to the Docker daemon.
+**/.DS_Store

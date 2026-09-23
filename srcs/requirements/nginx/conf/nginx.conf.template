@@ -1,0 +1,43 @@
+## @file nginx.conf.template
+## @brief WordPress vhost, TLS-only. The Dockerfile replaces __DOMAIN_NAME__
+##        with the real domain (from srcs/.env) at build time via sed.
+## @note No "server { listen 80; }" block exists anywhere in this file:
+##       the subject requires NGINX to be the only entrypoint, on port 443
+##       only, so HTTP is never even opened, not just redirected.
+server {
+	listen 443 ssl;
+	listen [::]:443 ssl;
+	server_name __DOMAIN_NAME__;
+
+	## @brief Certificate generated at build time by the Dockerfile.
+	ssl_certificate     /etc/nginx/ssl/inception.crt;
+	ssl_certificate_key /etc/nginx/ssl/inception.key;
+	## @brief Only TLSv1.2/1.3 accepted, per the subject's requirement.
+	ssl_protocols       TLSv1.2 TLSv1.3;
+	ssl_ciphers         HIGH:!aNULL:!MD5;
+
+	## @brief Same volume the WordPress container writes to, mounted here
+	##        read-only so NGINX can serve static assets directly.
+	root /var/www/html;
+	index index.php index.html;
+
+	## @brief Serve files/dirs directly; fall back to WordPress' front
+	##        controller (pretty permalinks) otherwise.
+	location / {
+		try_files $uri $uri/ /index.php?$args;
+	}
+
+	## @brief Hand off .php requests to the WordPress container's php-fpm
+	##        pool over FastCGI, via the "inception" Docker network.
+	location ~ \.php$ {
+		fastcgi_pass wordpress:9000;
+		fastcgi_index index.php;
+		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+		include fastcgi_params;
+	}
+
+	## @brief Block access to .htaccess/.htpasswd-style dotfiles.
+	location ~ /\.ht {
+		deny all;
+	}
+}
