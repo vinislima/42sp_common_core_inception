@@ -16,7 +16,15 @@ COPY conf/my.cnf /etc/mysql/mariadb.conf.d/99-inception.cnf
 COPY tools/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 ## @brief Prepare runtime dirs (socket, data dir) and make the entrypoint executable.
-RUN mkdir -p /run/mysqld /var/lib/mysql && \
+## @note Debian's mariadb-server postinst auto-initializes a default data
+##       directory at build time. If left in place, Docker's "populate an
+##       empty new volume from the image" step would copy that stale data
+##       into our bind-mounted volume on first run, making our own
+##       entrypoint think the DB was already set up and skip creating the
+##       real wordpress database/user. Wipe it so the image ships with a
+##       genuinely empty /var/lib/mysql.
+RUN rm -rf /var/lib/mysql && \
+    mkdir -p /run/mysqld /var/lib/mysql && \
     chown -R mysql:mysql /run/mysqld /var/lib/mysql && \
     chmod +x /usr/local/bin/entrypoint.sh
 
