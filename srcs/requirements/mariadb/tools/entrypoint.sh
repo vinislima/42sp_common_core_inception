@@ -15,6 +15,16 @@ DATADIR=/var/lib/mysql
 DB_ROOT_PASSWORD="$(cat /run/secrets/db_root_password)"
 DB_PASSWORD="$(cat /run/secrets/db_password)"
 
+## @brief Escapes a value for safe use inside a single-quoted SQL string
+##        literal. MariaDB's default sql_mode treats backslash as an
+##        escape character, so it must be escaped first, then the quote.
+sql_escape() {
+	local s=$1
+	s=${s//\\/\\\\}
+	s=${s//\'/\\\'}
+	printf '%s' "$s"
+}
+
 ## @brief Bind-mounted host volumes belong to the host user; reclaim
 ##        ownership for "mysql" before mariadbd tries to read/write it.
 chown -R mysql:mysql "${DATADIR}"
@@ -26,14 +36,29 @@ if [ ! -d "${DATADIR}/mysql" ]; then
 
 	## @brief Apply the setup SQL in bootstrap mode: same mechanism
 	##        mariadb-install-db itself uses to seed the system tables.
+	##        The heredoc delimiter is quoted ('SQL'), so the shell does
+	##        NOT expand $, ` or \ inside it — a password containing shell
+	##        metacharacters can never be executed as a command here. The
+	##        passwords are substituted afterwards as plain text, already
+	##        SQL-escaped by sql_escape().
 	echo "[mariadb-entrypoint] Applying setup SQL (mariadbd --bootstrap)..."
-	mariadbd --user=mysql --datadir="${DATADIR}" --bootstrap <<SQL
-ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASSWORD}';
-CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\`;
-CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
-GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE}\`.* TO '${MYSQL_USER}'@'%';
+	DB_ROOT_PASSWORD_ESC="$(sql_escape "${DB_ROOT_PASSWORD}")"
+	DB_PASSWORD_ESC="$(sql_escape "${DB_PASSWORD}")"
+
+	SETUP_SQL=$(cat <<'SQL'
+ALTER USER 'root'@'localhost' IDENTIFIED BY '__DB_ROOT_PASSWORD__';
+CREATE DATABASE IF NOT EXISTS `__MYSQL_DATABASE__`;
+CREATE USER IF NOT EXISTS '__MYSQL_USER__'@'%' IDENTIFIED BY '__DB_PASSWORD__';
+GRANT ALL PRIVILEGES ON `__MYSQL_DATABASE__`.* TO '__MYSQL_USER__'@'%';
 FLUSH PRIVILEGES;
 SQL
+)
+	SETUP_SQL=${SETUP_SQL//__DB_ROOT_PASSWORD__/$DB_ROOT_PASSWORD_ESC}
+	SETUP_SQL=${SETUP_SQL//__DB_PASSWORD__/$DB_PASSWORD_ESC}
+	SETUP_SQL=${SETUP_SQL//__MYSQL_DATABASE__/$MYSQL_DATABASE}
+	SETUP_SQL=${SETUP_SQL//__MYSQL_USER__/$MYSQL_USER}
+
+	printf '%s\n' "${SETUP_SQL}" | mariadbd --user=mysql --datadir="${DATADIR}" --bootstrap
 
 	echo "[mariadb-entrypoint] Initialization complete."
 else

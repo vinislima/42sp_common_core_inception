@@ -5,7 +5,7 @@
 ##       turn points to the Dockerfiles under srcs/requirements/.
 
 NAME     = inception
-LOGIN    = vinislima
+LOGIN    = vinda-si
 DATA_DIR = /home/$(LOGIN)/data
 COMPOSE  = docker compose -f srcs/docker-compose.yml
 

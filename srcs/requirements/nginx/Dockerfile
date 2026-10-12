@@ -12,7 +12,7 @@ RUN apt-get update && \
 ## @param DOMAIN_NAME Site domain, injected from srcs/.env via
 ##        docker-compose.yml's build.args. Used as the certificate's CN
 ##        and substituted into the vhost's server_name below.
-ARG DOMAIN_NAME=vinislima.42.fr
+ARG DOMAIN_NAME=vinda-si.42.fr
 
 ## @brief Generate a self-signed TLS certificate at build time.
 ## @note This is not a password/secret, so it does not break the

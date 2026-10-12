@@ -31,10 +31,10 @@ Guia para quem vai desenvolver, manter ou revisar este projeto.
    ```
 
 4. Apontar o domínio para a própria VM (necessário para acessar
-   `https://vinislima.42.fr`):
+   `https://vinda-si.42.fr`):
 
    ```sh
-   echo "127.0.0.1 vinislima.42.fr" | sudo tee -a /etc/hosts
+   echo "127.0.0.1 vinda-si.42.fr" | sudo tee -a /etc/hosts
    ```
 
 Nenhuma senha deve nunca ir para `srcs/.env`, para os `Dockerfile`s ou
@@ -47,7 +47,7 @@ O `Makefile`, na raiz, é só um wrapper conveniente em torno de
 
 ```sh
 make            # == docker compose -f srcs/docker-compose.yml up --build -d
-                #    (após criar /home/vinislima/data/{wordpress,mariadb})
+                #    (após criar /home/vinda-si/data/{wordpress,mariadb})
 make ps         # docker compose ... ps
 make logs       # docker compose ... logs -f
 make stop       # docker compose ... stop
@@ -55,7 +55,7 @@ make start      # docker compose ... start
 make restart    # docker compose ... restart
 make down       # docker compose ... down          (mantém volumes)
 make clean      # down + remove volumes e imagens locais do projeto
-make fclean     # clean + apaga /home/vinislima/data (perde os dados!)
+make fclean     # clean + apaga /home/vinda-si/data (perde os dados!)
 make re         # fclean + make (rebuild total do zero)
 ```
 
@@ -68,14 +68,14 @@ docker compose -f srcs/docker-compose.yml ps                  # nomes/estado dos
 docker compose -f srcs/docker-compose.yml exec wordpress bash # shell dentro de um container
 docker network ls                                              # ver a rede "srcs_inception"
 docker volume ls                                                # ver os volumes srcs_wp_db / srcs_wp_data
-docker volume inspect srcs_wp_data                              # confirmar o path /home/vinislima/data/...
+docker volume inspect srcs_wp_data                              # confirmar o path /home/vinda-si/data/...
 ```
 
 ## Arquitetura dos serviços
 
 - `srcs/docker-compose.yml` define os 3 serviços (`nginx`, `wordpress`,
   `mariadb`), a rede `inception` (bridge) e os volumes `wp_data`/`wp_db`
-  (bind para `/home/vinislima/data/wordpress` e `/home/vinislima/data/mariadb`).
+  (bind para `/home/vinda-si/data/wordpress` e `/home/vinda-si/data/mariadb`).
 - `srcs/requirements/<serviço>/Dockerfile` — cada um `FROM debian:bookworm`,
   instala só o software daquele serviço e termina com um processo em
   foreground (nunca com `tail -f`, `sleep infinity` ou similares).
@@ -91,11 +91,11 @@ docker volume inspect srcs_wp_data                              # confirmar o pa
 ## Onde os dados ficam e como persistem
 
 - Banco de dados do WordPress: volume `wp_db`, mapeado para
-  `/home/vinislima/data/mariadb` no host (dados internos do MariaDB).
+  `/home/vinda-si/data/mariadb` no host (dados internos do MariaDB).
 - Arquivos do WordPress (core, plugins, temas, uploads): volume
-  `wp_data`, mapeado para `/home/vinislima/data/wordpress` no host.
+  `wp_data`, mapeado para `/home/vinda-si/data/wordpress` no host.
 
 Como são volumes Docker (não dados dentro do container), eles sobrevivem
 a `docker compose down`, a rebuilds de imagem (`make re` sem `fclean`) e
-a reboots da VM — desde que os arquivos em `/home/vinislima/data/` não
+a reboots da VM — desde que os arquivos em `/home/vinda-si/data/` não
 sejam apagados manualmente. Só `make fclean` remove esses dados de fato.

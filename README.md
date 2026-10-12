@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by vinislima*
+*This project has been created as part of the 42 curriculum by vinda-si*
 
 # Inception
 
@@ -19,7 +19,7 @@ A stack é composta por três serviços:
 
 Os três containers se comunicam por uma rede Docker dedicada
 (`inception`), e dois volumes Docker persistem, respectivamente, os
-arquivos do WordPress e os dados do MariaDB em `/home/vinislima/data/`
+arquivos do WordPress e os dados do MariaDB em `/home/vinda-si/data/`
 no host.
 
 ### Estrutura do projeto
@@ -87,7 +87,7 @@ NGINX).
 **Docker Volumes vs Bind Mounts**
 Um bind mount aponta diretamente para um caminho do host, gerenciado
 manualmente por quem administra a máquina. Um volume Docker (usado neste
-projeto, com `driver_opts` apontando para `/home/vinislima/data/...`) é
+projeto, com `driver_opts` apontando para `/home/vinda-si/data/...`) é
 gerenciado pelo próprio Docker (criação, ciclo de vida, permissões),
 sobrevive à remoção dos containers e é a forma recomendada de persistir
 dados como o banco do WordPress e os arquivos do site.
@@ -100,11 +100,11 @@ Pré-requisitos: Docker e Docker Compose instalados em uma VM Linux.
 git clone <repo> && cd 42sp_common_core_inception
 cp secrets/*.txt.example secrets/   # renomeie removendo .example e edite as senhas
 cp srcs/.env.example srcs/.env      # ajuste o domínio/usuários se necessário
-echo "127.0.0.1 vinislima.42.fr" | sudo tee -a /etc/hosts
+echo "127.0.0.1 vinda-si.42.fr" | sudo tee -a /etc/hosts
 make                                 # builda as imagens e sobe os 3 containers
 ```
 
-Acesse `https://vinislima.42.fr` no navegador (aceite o aviso de
+Acesse `https://vinda-si.42.fr` no navegador (aceite o aviso de
 certificado autoassinado). Veja `USER_DOC.md` para detalhes de uso e
 `DEV_DOC.md` para detalhes de desenvolvimento/manutenção.
 

@@ -58,13 +58,13 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/vinislima/data/mariadb
+      device: /home/vinda-si/data/mariadb
   wp_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/vinislima/data/wordpress
+      device: /home/vinda-si/data/wordpress
 
 secrets:
   db_root_password:

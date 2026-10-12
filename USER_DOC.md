@@ -27,20 +27,20 @@ make down       # para e remove os containers (os dados nos volumes permanecem)
 
 ## Acessar o site e o painel de administração
 
-1. Garanta que `vinislima.42.fr` resolve para o IP da VM. Em geral isso é
+1. Garanta que `vinda-si.42.fr` resolve para o IP da VM. Em geral isso é
    feito adicionando ao `/etc/hosts` (na própria VM ou na máquina que vai
    acessar o navegador):
 
    ```text
-   <IP-da-VM> vinislima.42.fr
+   <IP-da-VM> vinda-si.42.fr
    ```
 
-2. Acesse `https://vinislima.42.fr` no navegador.
+2. Acesse `https://vinda-si.42.fr` no navegador.
    - Por ser um certificado autoassinado, o navegador vai mostrar um
      aviso de segurança — isso é esperado, basta continuar/aceitar.
    - `http://` (porta 80) não funciona por design: o único ponto de
      entrada é a porta 443 em HTTPS.
-3. Painel de administração: `https://vinislima.42.fr/wp-admin`
+3. Painel de administração: `https://vinda-si.42.fr/wp-admin`
    - Usuário administrador: valor de `WP_ADMIN_USER` (ver `srcs/.env`).
    - Existe também um segundo usuário (não administrador), definido em
      `WP_USER`, para publicar/comentar sem privilégios de admin.
@@ -70,7 +70,7 @@ docker compose -f srcs/docker-compose.yml logs wordpress
 docker compose -f srcs/docker-compose.yml logs mariadb
 ```
 
-- Se `https://vinislima.42.fr` carregar o site (e não a tela de instalação
+- Se `https://vinda-si.42.fr` carregar o site (e não a tela de instalação
   do WordPress), o WordPress e o banco estão corretamente configurados.
 - Se aparecer erro de conexão, confira `make ps` e os logs acima para
   identificar qual dos três containers não subiu.
